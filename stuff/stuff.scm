@@ -48,7 +48,7 @@
                             ((blob a)
                              (blob b))
                             "C_word *r = C_alloc(16);"
-                            "uint64_t u = *((uint64_t*)a) + *((uint64_t*)b);"
+                            "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) + be64toh(*((uint64_t*)b)));"
                             "C_return(C_bytevector(&r, 8, (char*)&u));"))
 (define wh#and (foreign-primitive scheme-object
                            ((blob a)
