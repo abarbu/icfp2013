@@ -92,70 +92,71 @@
 	     (unused-wh:op1 (set-intersectione unused-operators wh:op1))
 	     (unused-wh:op2 (set-intersectione unused-operators wh:op2))
 	     (minsize (+ (* 2 (length unused-wh:op1)) (* 3 (length unused-wh:op2)) )))
-	(if (> minsize size)
-	    fail
-      (either
-       (let ((op1 (a-member-of (set-intersectione wh:op1 allowed-operators)))
-              (body (an-expression-of-size (- size 1) allowed-operators locals)))
-	 ;;(if (not (member (quote op1) used-operators))
-	 ;;    (local-set! used-operators (cons (quote op1) used-operators))
-	 ;;    )
-         `(,op1 ,body))
-       ;; This is not valid because programs can't contain lambdas
-       ;; (let* ((var (gensym 'b))
-       ;;        (body (an-expression-of-size (- size 1) allowed-operators (cons var locals))))
-       ;;  `(lambda (,var) ,body))
-       (either
-        (let*
-          ((op2 (a-member-of (set-intersectione wh:op2 allowed-operators)))
-           ;; -2 because we pay 1 for the op1, min 1 for body1
-           (size0 (an-integer-between 1 (- size 2)))
-           (body0 (an-expression-of-size size0 allowed-operators locals))
-           (size1 (an-integer-between 1 (- (- size size0) 1)))
-           (body1 (an-expression-of-size size1 allowed-operators locals)))
-	 ;;(if (not (member (quote op2) used-operators))
-	 ;;    (local-set! used-operators (cons (quote op2) used-operators))
-	 ;;    )
-         `(,op2 ,body0 ,body1))
-        (either
-         (begin
-          (unless (member 'wh:if0 allowed-operators) (fail))
-          (let* ((size-e0 (an-integer-between 1 (- size 3)))
-                 (e0 (an-expression-of-size size-e0 allowed-operators locals))
-                 (size-e1 (an-integer-between 1 (- (- size size-e0) 2)))
-                 (e1 (an-expression-of-size size-e1 allowed-operators locals))
-                 (size-e2 (an-integer-between 1 (- (- (- size size-e0) size-e1) 1)))
-                 (e2 (an-expression-of-size size-e2 allowed-operators locals)))
-           `(wh:if0 ,e0 ,e1 ,e2)))
-         (either
-          (begin
-           (unless (member 'wh:fold allowed-operators) (fail))
-           (let* ((vars (list (gensym 'x) (gensym 'y)))
-                  (new-allowed-operators (removee 'wh:fold allowed-operators))
-                  (size-e0 (an-integer-between 1 (- size 3)))
-                  (e0 (an-expression-of-size size-e0 new-allowed-operators locals))
-                  (size-e1 (an-integer-between 1 (- (- size size-e0) 2)))
-                  (e1 (an-expression-of-size size-e1 new-allowed-operators locals))
-                  (size-e2 (an-integer-between 1 (- (- (- size size-e0) size-e1) 1)))
-                  (e2 (an-expression-of-size size-e2 new-allowed-operators
-                                             (append vars locals))))
-            `(wh:fold ,e0 ,e1 (lambda ,vars ,e2))))
-          (begin
-           (unless (member 'wh:tfold allowed-operators) (fail))
-           (let* ((vars (list (gensym 'x) (gensym 'y)))
-                  (new-allowed-operators (removee 'wh:tfold allowed-operators))
-                  (e0 (a-member-of locals))
-                  (size-e2 (an-integer-between 1 (- size 4)))
-                  (e2 (an-expression-of-size size-e2 new-allowed-operators locals)))
-            `(wh:fold ,e0 wh:0 (lambda ,vars ,e2)))))))))))))
+	(if (> 0 size)
+;;	    (pretty-print (list used-operators minsize allowed-operators))
+	    (fail)
+	    (either
+	     (let ((op1 (a-member-of (set-intersectione wh:op1 allowed-operators)))
+		   (body (an-expression-of-size (- size 1) allowed-operators locals)))
+	       (if (not (member (quote op1) used-operators))
+	           (local-set! used-operators (cons (quote op1) used-operators))
+	           )
+	       `(,op1 ,body))
+	     ;; This is not valid because programs can't contain lambdas
+	     ;; (let* ((var (gensym 'b))
+	     ;;        (body (an-expression-of-size (- size 1) allowed-operators (cons var locals))))
+	     ;;  `(lambda (,var) ,body))
+	     (either
+	      (let*
+		  ((op2 (a-member-of (set-intersectione wh:op2 allowed-operators)))
+		   ;; -2 because we pay 1 for the op1, min 1 for body1
+		   (size0 (an-integer-between 1 (- size 2)))
+		   (body0 (an-expression-of-size size0 allowed-operators locals))
+		   (size1 (an-integer-between 1 (- (- size size0) 1)))
+		   (body1 (an-expression-of-size size1 allowed-operators locals)))
+		(if (not (member (quote op2) used-operators))
+		    (local-set! used-operators (cons (quote op2) used-operators))
+		    )
+		`(,op2 ,body0 ,body1))
+	      (either
+	       (begin
+		 (unless (member 'wh:if0 allowed-operators) (fail))
+		 (let* ((size-e0 (an-integer-between 1 (- size 3)))
+			(e0 (an-expression-of-size size-e0 allowed-operators locals))
+			(size-e1 (an-integer-between 1 (- (- size size-e0) 2)))
+			(e1 (an-expression-of-size size-e1 allowed-operators locals))
+			(size-e2 (an-integer-between 1 (- (- (- size size-e0) size-e1) 1)))
+			(e2 (an-expression-of-size size-e2 allowed-operators locals)))
+		   `(wh:if0 ,e0 ,e1 ,e2)))
+	       (either
+		(begin
+		  (unless (member 'wh:fold allowed-operators) (fail))
+		  (let* ((vars (list (gensym 'x) (gensym 'y)))
+			 (new-allowed-operators (removee 'wh:fold allowed-operators))
+			 (size-e0 (an-integer-between 1 (- size 3)))
+			 (e0 (an-expression-of-size size-e0 new-allowed-operators locals))
+			 (size-e1 (an-integer-between 1 (- (- size size-e0) 2)))
+			 (e1 (an-expression-of-size size-e1 new-allowed-operators locals))
+			 (size-e2 (an-integer-between 1 (- (- (- size size-e0) size-e1) 1)))
+			 (e2 (an-expression-of-size size-e2 new-allowed-operators
+						    (append vars locals))))
+		    `(wh:fold ,e0 ,e1 (lambda ,vars ,e2))))
+		(begin
+		  (unless (member 'wh:tfold allowed-operators) (fail))
+		  (let* ((vars (list (gensym 'x) (gensym 'y)))
+			 (new-allowed-operators (removee 'wh:tfold allowed-operators))
+			 (e0 (a-member-of locals))
+			 (size-e2 (an-integer-between 1 (- size 4)))
+			 (e2 (an-expression-of-size size-e2 new-allowed-operators locals)))
+		    `(wh:fold ,e0 wh:0 (lambda ,vars ,e2)))))))))))))
 
 (define (a-program-of-size size allowed-operators)
- (let ((var (gensym 'x)))
- `(lambda (,var)
-   ,(an-expression-of-size
-     size
-     allowed-operators
-     (list var)))))
+  (let ((var (gensym 'x)))
+    `(lambda (,var)
+       ,(an-expression-of-size
+	 size
+	 allowed-operators
+	 (list var)))))
 
 ;; (read-expr "(lambda (x_68323) (fold x_68323 0 (lambda (x_68323 x_68324) (xor (if0 (not (shr4 (and (xor (shr4 (shr16 (shr1 (or (and (not (shr1 (not x_68324))) 1) 1)))) x_68323) x_68323))) x_68323 0) x_68323))))")
 
