@@ -2,12 +2,12 @@
 
 ;; myproblems
 (pp (with-input-from-request
-     "http://icfpc2013.cloudapp.net/myproblems?auth=04683EUSFXg7YCiEYqB0PzBEnGDUAAxpe8ZDxdruvpsH1H"
+     "http://icfpc2013.cloudapp.net/myproblems?auth=key"
      #f read-json))
 
 (pp (with-input-from-request
-     "http://icfpc2013.cloudapp.net/train?auth=04683EUSFXg7YCiEYqB0PzBEnGDUAAxpe8ZDxdruvpsH1H"
-     (json->string '((size . 27) (operators . #("tfold"))))
+     "http://icfpc2013.cloudapp.net/train?auth=key"
+     (json->string '((size . 5)))
      read-json))
 
 (define (read-expr expr)
@@ -75,14 +75,6 @@
        (else (unless (symbol? expr) (error "Bad expr" expr))
              '())))
 
-(define (a-program-of-size size allowed-operators)
- (let ((var (gensym 'x)))
- `(lambda (,var)
-   ,(an-expression-of-size
-     size
-     allowed-operators
-     (list var)))))
-
 (define wh:op1 '(wh:not wh:shl1 wh:shr1 wh:shr4 wh:shr16))
 (define wh:op2 '(wh:and wh:or wh:xor wh:plus))
 
@@ -140,6 +132,14 @@
                   (size-e2 (an-integer-between 1 (- size 4)))
                   (e2 (an-expression-of-size size-e2 new-allowed-operators locals)))
             `(wh:fold ,e0 wh:0 (lambda ,vars ,e2)))))))))))
+
+(define (a-program-of-size size allowed-operators)
+ (let ((var (gensym 'x)))
+ `(lambda (,var)
+   ,(an-expression-of-size
+     size
+     allowed-operators
+     (list var)))))
 
 ;; (read-expr "(lambda (x_68323) (fold x_68323 0 (lambda (x_68323 x_68324) (xor (if0 (not (shr4 (and (xor (shr4 (shr16 (shr1 (or (and (not (shr1 (not x_68324))) 1) 1)))) x_68323) x_68323))) x_68323 0) x_68323))))")
 
