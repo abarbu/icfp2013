@@ -84,7 +84,7 @@
 	     (minsize (+ (* 2 (length unused-wh#op1)) (* 3 (length unused-wh#op2)) )))
 	(if (> 0 size)
 ;;	    (pretty-print (list used-operators minsize allowed-operators))
-	    (fail)
+  	    (fail)
 	    (either
 	     (let ((op1 (a-member-of (set-intersectione wh#op1 allowed-operators)))
 		   (body (an-expression-of-size (- size 1) allowed-operators locals)))
