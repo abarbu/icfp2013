@@ -75,7 +75,9 @@
        (else (unless (symbol? expr) (error "Bad expr" expr))
              '())))
 
+;; List of signal
 (define wh:op1 '(wh:not wh:shl1 wh:shr1 wh:shr4 wh:shr16))
+;; List of two
 (define wh:op2 '(wh:and wh:or wh:xor wh:plus))
 
 (define used-operators '())
@@ -86,12 +88,18 @@
  (either
   (if (= size 1)
       (a-member-of (cons 'wh:0 (cons 'wh:1 locals)))
+      (let* ((unused-operators (set-differencee allowed-operators used-operators))
+	     (unused-wh:op1 (set-intersectione unused-operators wh:op1))
+	     (unused-wh:op2 (set-intersectione unused-operators wh:op2))
+	     (minsize (+ (* 2 (length unused-wh:op1)) (* 3 (length unused-wh:op2)) )))
+	(if (> minsize size)
+	    fail
       (either
        (let ((op1 (a-member-of (set-intersectione wh:op1 allowed-operators)))
               (body (an-expression-of-size (- size 1) allowed-operators locals)))
-	 (if (not (member (quote op1) used-operators))
-	     (local-set! used-operators (cons (quote op1) used-operators))
-	     )
+	 ;;(if (not (member (quote op1) used-operators))
+	 ;;    (local-set! used-operators (cons (quote op1) used-operators))
+	 ;;    )
          `(,op1 ,body))
        ;; This is not valid because programs can't contain lambdas
        ;; (let* ((var (gensym 'b))
@@ -105,6 +113,9 @@
            (body0 (an-expression-of-size size0 allowed-operators locals))
            (size1 (an-integer-between 1 (- (- size size0) 1)))
            (body1 (an-expression-of-size size1 allowed-operators locals)))
+	 ;;(if (not (member (quote op2) used-operators))
+	 ;;    (local-set! used-operators (cons (quote op2) used-operators))
+	 ;;    )
          `(,op2 ,body0 ,body1))
         (either
          (begin
@@ -136,7 +147,7 @@
                   (e0 (a-member-of locals))
                   (size-e2 (an-integer-between 1 (- size 4)))
                   (e2 (an-expression-of-size size-e2 new-allowed-operators locals)))
-            `(wh:fold ,e0 wh:0 (lambda ,vars ,e2)))))))))))
+            `(wh:fold ,e0 wh:0 (lambda ,vars ,e2)))))))))))))
 
 (define (a-program-of-size size allowed-operators)
  (let ((var (gensym 'x)))
