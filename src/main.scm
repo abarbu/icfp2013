@@ -27,6 +27,8 @@
 				    (let
 					((opl (vector->list (cdr (assoc 'operators p)))))
 				      (and
+				       ;; Stricly speaking also filter things we failed to solve
+				       ;; probably with timeleft of 0
 				       (not (assoc 'solved p))
 				       (not (member "fold" opl))
 				       (not (member "tfold" opl))
@@ -36,6 +38,8 @@
 (pretty-print possible-problems)
 (display (length possible-problems))
 (display "\n")
-(define problem-ids (map (lambda (p) (cdr (assoc 'id p))) possible-problems))
-(display (car problem-ids))
+;; Try and just solve the head
+(display (car possible-problems))
+(define my-problem (car possible-problems))
+(solve-problem (cdr (assoc 'id my-problem)) (cdr (assoc 'size my-problem)) (cdr assoc 'operators my-problem))
 (display "\n")
