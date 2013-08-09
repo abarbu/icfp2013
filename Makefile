@@ -2,7 +2,7 @@ CSCFLAGS = -O2
 # -O4 -optimize-leaf-routines -u -unboxing  -no-argc-checks -no-bound-checks -no-procedure-checks -local
 CSC = csc $(CSCFLAGS)
 
-PACKAGES = medea
+PACKAGES = medea http-client
 SOURCES = $(shell find src/ -iname \*.scm -or -iname \*.ss)
 IGNORES = src/main.scm
 NONEXEC_SOURCES = $(filter-out $(IGNORES), $(SOURCES))

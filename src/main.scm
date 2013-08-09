@@ -5,4 +5,4 @@
 (display my-secret)
 (display "\n")
 (display "call result was")
-(display (make-train-call my-secret))
+(make-train-call my-secret read-string)
