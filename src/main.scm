@@ -47,6 +47,7 @@
 (display (length possible-problems))
 (display "\n")
 ;; Try and just solve the head
+(sleep 20)
 (map (lambda (my-problem)
        (display (list "Tring to solve" my-problem))
        (let ((problem-solution (solve-problem (cdr (assoc 'id my-problem)) (cdr (assoc 'size my-problem)) (cdr (assoc 'operators my-problem)))))
@@ -56,4 +57,6 @@
 	     )
 	 )
        (display "\n")
+       (display "Sleeping\n")
+       (sleep 5)
        ) possible-problems)
