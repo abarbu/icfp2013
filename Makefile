@@ -5,7 +5,7 @@ CC = gcc -Wall -Werror
 
 PACKAGES = medea http-client bind kvlists
 SOURCES = $(shell find src/ -iname \*.scm -or -iname \*.ss)
-IGNORES = src/main.scm src/stuff.scm
+IGNORES = src/main.scm src/more-stuff.scm
 NONEXEC_SOURCES = $(filter-out $(IGNORES), $(SOURCES))
 
 all: setup main
