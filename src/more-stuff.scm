@@ -1,3 +1,4 @@
+(declare (unit more-stuff))
 (use stuff scheme2c-compatibility nondeterminism traversal)
 
 (define (read-expr expr)
@@ -185,11 +186,11 @@
 ;; (all-values (an-expression-of-size 3 '(wh#and wh#not) '(x y z)))
 
 (define (solve-training-problem size)
- (let* ((example (values (make-train-call1 key size)))
+ (let* ((example (values (make-train-call1 my-secret size)))
         (inputs (test-sequence))
-        (seq (values (make-eval-program-call key (cdr (assoc 'challenge example)) inputs ))))
+        (seq (values (make-eval-program-call my-secret (cdr (assoc 'challenge example)) inputs ))))
   (display (list example inputs seq))(newline)
-  (make-guess-call key
+  (make-guess-call my-secret
                    (cdr (assoc 'id example))
                    (format #f
                            "~a"
