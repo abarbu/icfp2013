@@ -43,7 +43,7 @@
   (display "Making call ")
   (display params)
   (display "\n")
-  (with-input-from-request (make-req-url type auth-code) (json->string params) read-json))
+  (with-input-from-request (make-req-url type auth-code) (json->string params) read-json)
 )
 (define (make-call auth-code type params)
   (display "Making call ")
