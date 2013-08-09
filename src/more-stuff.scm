@@ -89,7 +89,7 @@
       (either
        (let ((op1 (a-member-of (set-intersectione wh:op1 allowed-operators)))
               (body (an-expression-of-size (- size 1) allowed-operators locals)))
-	 (if (not (member op1 used-operators))
+	 (if (not (member (quote op1) used-operators))
 	     (local-set! used-operators (cons (quote op1) used-operators))
 	     )
          `(,op1 ,body))
