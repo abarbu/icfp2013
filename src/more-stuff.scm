@@ -1,14 +1,4 @@
-(use stuff)
-
-;; myproblems
-(pp (with-input-from-request
-     "http://icfpc2013.cloudapp.net/myproblems?auth=key"
-     #f read-json))
-
-(pp (with-input-from-request
-     "http://icfpc2013.cloudapp.net/train?auth=key"
-     (json->string '((size . 5)))
-     read-json))
+(use stuff format)
 
 (define (read-expr expr)
  (deep-map (lambda (a) (or (symbol? a) (number? a)))
@@ -141,6 +131,26 @@
      allowed-operators
      (list var)))))
 
+(define (0&1bit-test-sequence)
+ (let loop ((n 0) (l (list wh:1)))
+  (if (= n 64)
+      l
+      (loop (+ n 1) (cons (wh:shl1 (car l)) l)))))
+
+(define (test-sequence)
+ (append
+  (0&1bit-test-sequence)
+  (map-n (lambda _ (wh:random)) (- 256 65))))
+
+(define (test-everything key)
+ (let* ((example (values (make-train-call1 key 5)))
+        (seq (values (make-eval-program-call key (assoc 'challenge example) (test-sequence)))))
+  
+  (list example seq)))
+
+(define (wh:read-from-string string)
+ (read-from-string (list->string (append '(#\# #\$ #\{) (drop (string->list string) 2) '(#\})))))
+
 ;; (read-expr "(lambda (x_68323) (fold x_68323 0 (lambda (x_68323 x_68324) (xor (if0 (not (shr4 (and (xor (shr4 (shr16 (shr1 (or (and (not (shr1 (not x_68324))) 1) 1)))) x_68323) x_68323))) x_68323 0) x_68323))))")
 
 ;; (read-expr "(lambda (x_13591) (shr1 (shl1 (not (if0 (and (shl1 1) (or 1 x_13591)) x_13591 0)))))")
@@ -148,3 +158,13 @@
 ;; ((eval (read-expr "(lambda (x_13591) (shr1 (shl1 (not (if0 (and (shl1 1) (or 1 x_13591)) x_13591 0)))))")) wh:1)
 
 ;; (all-values (an-expression-of-size 3 '(wh:and wh:not) '(x y z)))
+
+;; (define example (values (make-train-call1 key 5)))
+;; (define inputs (test-sequence))
+;; (define seq (values (make-eval-program-call key (cdr (assoc 'challenge example)) )))
+;; (possibly?
+;;   (let* ((code (a-program-of-size
+;;                 (cdr (assoc 'size example))
+;;                 (map (lambda (a) (string->symbol (conc 'wh\: a))) (vector->list (cdr (assoc 'operators example))))))
+;;          (f (eval code)))
+;;   (every (lambda (in out) (equal? (f in) out)) inputs (map wh:read-from-string (vector->list (cdr (assoc 'outputs seq)))))))
