@@ -19,6 +19,6 @@
  (display "Status\n")
  (display (make-status-call my-secret)))
 
-(declare (uses rpc secret more-stuff))
+(declare (uses stuff rpc secret more-stuff))
 (use stuff scheme2c-compatibility nondeterminism traversal)
 (solve-training-problem 8)
