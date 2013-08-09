@@ -21,4 +21,21 @@
 
 (declare (uses rpc secret more-stuff))
 (use stuff scheme2c-compatibility nondeterminism traversal)
-(solve-training-problem 8)
+;;(solve-training-problem 8)
+(define problems (vector->list (make-myproblems-call my-secret)))
+(define possible-problems (filter (lambda (p)
+				    (let
+					((opl (vector->list (cdr (assoc 'operators p)))))
+				      (and
+				       (not (assoc 'solved p))
+				       (not (member "fold" opl))
+				       (not (member "tfold" opl))
+				       (< (cdr (assoc 'size p)) 8)
+				       (< (vector-length (cdr (assoc 'operators p)))))))
+				  problems))
+(pretty-print possible-problems)
+(display (length possible-problems))
+(display "\n")
+(define problem-ids (map (lambda (p) (cdr (assoc 'id p))) possible-problems))
+(display (car problem-ids))
+(display "\n")

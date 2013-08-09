@@ -202,3 +202,21 @@
                                     (f (eval code)))
                               (unless (every (lambda (in out) (equal? (f in) out)) inputs (map wh#read-from-string (vector->list (cdr (assoc 'outputs seq))))) (fail))
                               code)))))))
+
+(define (solve-problem id)
+ (let* ((example (values (make-train-call1 my-secret size)))
+        (inputs (test-sequence))
+        (seq (values (make-eval-program-call my-secret (cdr (assoc 'challenge example)) inputs ))))
+  (display (list example inputs seq))(newline)
+  (make-guess-call my-secret
+                   (cdr (assoc 'id example))
+                   (format #f
+                           "~a"
+                           (unread-expr
+                            (one-value
+                             (let* ((code (a-program-of-size
+                                           (cdr (assoc 'size example))
+                                           (map (lambda (a) (string->symbol (conc 'wh# a))) (vector->list (cdr (assoc 'operators example))))))
+                                    (f (eval code)))
+                              (unless (every (lambda (in out) (equal? (f in) out)) inputs (map wh#read-from-string (vector->list (cdr (assoc 'outputs seq))))) (fail))
+                              code)))))))
