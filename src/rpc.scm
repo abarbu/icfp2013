@@ -1,5 +1,6 @@
 (declare (unit rpc))
 (use medea http-client)
+(use stuff scheme2c-compatibility nondeterminism traversal)
 (client-software (list (list "Wandering Hobos" 0.1 #f)))
 (define (wh:format blob)
  (let ((str (format #f "~a" blob)))
