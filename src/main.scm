@@ -33,6 +33,7 @@
 				       (not (member "fold" opl))
 				       (not (member "tfold" opl))
 				       (< (cdr (assoc 'size p)) 8)
+;;				       (eq? (cdr (assoc 'id p)) '0dO2InyjjBuzqwxqb2mvUhhX)
 				       (< (vector-length (cdr (assoc 'operators p)))))))
 				  problems))
 (pretty-print possible-problems)
@@ -41,5 +42,6 @@
 ;; Try and just solve the head
 (display (car possible-problems))
 (define my-problem (car possible-problems))
-(solve-problem (cdr (assoc 'id my-problem)) (cdr (assoc 'size my-problem)) (cdr assoc 'operators my-problem))
+(display (list "Tring to solve " (cdr (assoc 'id my-problem))))
+(solve-problem (cdr (assoc 'id my-problem)) (cdr (assoc 'size my-problem)) (cdr (assoc 'operators my-problem)))
 (display "\n")

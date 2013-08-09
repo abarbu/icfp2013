@@ -207,6 +207,7 @@
  (let* ((inputs (test-sequence))
         (seq (values (make-eval-program-call my-secret id inputs ))))
   (display (list id inputs seq))(newline)
+  (display (list id size operators))(newline)
   (make-guess-call my-secret
                    id
                    (format #f
@@ -216,6 +217,7 @@
                              (let* ((code (a-program-of-size
                                            size
                                            (map (lambda (a) (string->symbol (conc 'wh# a))) (vector->list operators))))
-                                    (f (eval code)))
+                                    (f (eval code))
+				    )
                               (unless (every (lambda (in out) (equal? (f in) out)) inputs (map wh#read-from-string (vector->list (cdr (assoc 'outputs seq))))) (fail))
                               code)))))))
