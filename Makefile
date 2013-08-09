@@ -5,7 +5,6 @@ CC = gcc -Wall -Werror
 
 PACKAGES = medea http-client bind kvlists scheme2c-compatibility nondeterminism traversal
 SOURCES = $(shell find src/ -iname \*.scm -or -iname \*.ss)
-IGNORES = src/main.scm src/more-stuff.scm
 NONEXEC_SOURCES = $(filter-out $(IGNORES), $(SOURCES))
 
 all: setup main
