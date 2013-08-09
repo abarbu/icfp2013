@@ -1,0 +1,15 @@
+;;;  -*- Hen -*-
+
+((egg "stuff.egg")
+ (category math)
+ (author "WH")
+ (maintainer "WH")
+ (license "LGPL")
+ (doc-from-wiki)
+ (synopsis "")
+ (depends setup-helper)
+ (test-depends test)
+ (files "stuff.meta" 
+        "stuff.release-info"
+        "stuff.scm" 
+        "stuff.setup"))

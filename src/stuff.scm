@@ -1,12 +1,5 @@
-;; ;; myproblems
-;; (pp (with-input-from-request
-;;      "http://icfpc2013.cloudapp.net/myproblems?auth=04683EUSFXg7YCiEYqB0PzBEnGDUAAxpe8ZDxdruvpsH1H"
-;;      #f read-json))
-
-;; (pp (with-input-from-request
-;;      "http://icfpc2013.cloudapp.net/train?auth=04683EUSFXg7YCiEYqB0PzBEnGDUAAxpe8ZDxdruvpsH1H"
-;;      (json->string '((size . 27) (operators . #("tfold"))))
-;;      read-json))
+(module stuff *
+(import chicken scheme srfi-1 extras data-structures ports files foreign)
 
 ;; program    P ::= "(" "lambda" "(" id ")" e ")"
 ;; expression e ::= "0" | "1" | id
@@ -40,25 +33,79 @@
 ;;    (or 0x0000000000000088 
 ;;        0x0000000000000000))))))))
 
-(define (read-expr expr)
- (deep-map symbol?
-           (lambda (s)
-            (cond ((member s '(and or shl1 shr1 shr4 shr16 plus fold xor if0 not))
-                   (string->symbol (conc 'wh\: s)))
-                  (else s)))
-           (read-from-string expr)))
+(define (deep-map p f tree)
+ (cond ((p tree) (f tree))
+       ((list? tree) (map (lambda (subtree) (deep-map p f subtree)) tree))
+       (else tree)))
 
-(define wh:and bitwise-and)
-(define wh:or bitwise-ior)
-(define wh:shl1 (lambda (a) (arithmetic-shift a 1)))
-(define wh:shr1 (lambda (a) (arithmetic-shift a -1)))
-(define wh:shr4 (lambda (a) (arithmetic-shift a -4)))
-(define wh:shr16 (lambda (a) (arithmetic-shift a -16)))
-(define wh:plus +)
-(define wh:xor bitwise-xor)
-(define (wh:if0 c t e) (if (zero? c) t e))
-(define wh:not bitwise-not)
-
-(read-expr "(lambda (x_68323) (fold x_68323 0 (lambda (x_68323 x_68324) (xor (if0 (not (shr4 (and (xor (shr4 (shr16 (shr1 (or (and (not (shr1 (not x_68324))) 1) 1)))) x_68323) x_68323))) x_68323 0) x_68323))))")
-
-(read-expr "(lambda (x_13591) (shr1 (shl1 (not (if0 (and (shl1 1) (or 1 x_13591)) x_13591 0)))))")
+(define wh:0 '#${0000000000000000})
+(define wh:1 '#${0000000000000001})
+(define wh:plus (foreign-primitive scheme-object
+                            ((blob a)
+                             (blob b))
+                            "C_word *r = C_alloc(90);"
+                            "uint64_t u = *((uint64_t*)a) + *((uint64_t*)b);"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:and (foreign-primitive scheme-object
+                           ((blob a)
+                            (blob b))
+                           "C_word *r = C_alloc(90);"
+                           "uint64_t u = *((uint64_t*)a) & *((uint64_t*)b);"
+                           "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:or  (foreign-primitive scheme-object
+                           ((blob a)
+                            (blob b))
+                           "C_word *r = C_alloc(90);"
+                           "uint64_t u = *((uint64_t*)a) | *((uint64_t*)b);"
+                           "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:xor (foreign-primitive scheme-object
+                           ((blob a)
+                            (blob b))
+                           "C_word *r = C_alloc(90);"
+                           "uint64_t u = *((uint64_t*)a) ^ *((uint64_t*)b);"
+                           "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:not (foreign-primitive scheme-object
+                           ((blob a))
+                           "C_word *r = C_alloc(90);"
+                           "uint64_t u = ~*((uint64_t*)a);"
+                           "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:shl1 (foreign-primitive scheme-object
+                            ((blob a))
+                            "C_word *r = C_alloc(90);"
+                            "uint64_t u = *((uint64_t*)a) << 1;"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:shl8 (foreign-primitive scheme-object
+                            ((blob a))
+                            "C_word *r = C_alloc(90);"
+                            "uint64_t u = *((uint64_t*)a) << 8;"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:shr1 (foreign-primitive scheme-object
+                            ((blob a))
+                            "C_word *r = C_alloc(90);"
+                            "uint64_t u = *((uint64_t*)a) >> 1;"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:shr4 (foreign-primitive scheme-object
+                            ((blob a))
+                            "C_word *r = C_alloc(90);"
+                            "uint64_t u = *((uint64_t*)a) >> 4;"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:shr8 (foreign-primitive scheme-object
+                            ((blob a))
+                            "C_word *r = C_alloc(90);"
+                            "uint64_t u = *((uint64_t*)a) >> 8;"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:shr16 (foreign-primitive scheme-object
+                             ((blob a))
+                             "C_word *r = C_alloc(90);"
+                             "uint64_t u = *((uint64_t*)a) >> 16;"
+                             "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define (wh:if0 c t e) (if (equal? c wh:0) t e))
+(define (wh:fold blob i f)
+ (let ((mask '#${00000000000000ff}))
+  (let loop ((blob blob) (o 0) (r i))
+   (if (= o 8)
+       r
+       (loop (wh:shl8 blob)
+             (+ o 1)
+             (f (wh:and mask blob) r))))))
+)

@@ -1,0 +1,9 @@
+;;;  -*- Hen -*-
+
+(use setup-helper-mod)
+
+(verify-extension-name "stuff")
+
+(setup-shared-extension-module 'stuff (extension-version "0.1")
+  #:inline? #t #:types? #t
+  #:compile-options '(-O3 -d2))
