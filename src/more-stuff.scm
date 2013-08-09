@@ -102,7 +102,7 @@
 		   ;; -2 because we pay 1 for the op1, min 1 for body1
 		   (size0 (an-integer-between 1 (- size 2)))
 		   (body0 (an-expression-of-size size0 allowed-operators locals))
-		   (size1 (an-integer-between 1 (- (- size size0) 1)))
+		   (size1 (- (- size size0) 1))
 		   (body1 (an-expression-of-size size1 allowed-operators locals)))
 		(if (not (member (quote op2) used-operators))
 		    (local-set! used-operators (cons (quote op2) used-operators))
