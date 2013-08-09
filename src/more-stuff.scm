@@ -205,9 +205,11 @@
 
 (define (solve-problem id size operators)
  (let* ((inputs (test-sequence))
-        (seq (values (make-eval-program-call my-secret id inputs ))))
+        (seq (values (begin (display "A")(newline)(make-eval-id-call my-secret id inputs )))))
   (display (list id inputs seq))(newline)
-  (display (list id size operators))(newline)
+  (display (list id size))
+  (display (list "operators:" operators))(newline)
+  (display "Making guess call")(newline)
   (make-guess-call my-secret
                    id
                    (format #f

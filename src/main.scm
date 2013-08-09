@@ -21,7 +21,10 @@
 
 (declare (uses rpc secret more-stuff))
 (use stuff scheme2c-compatibility nondeterminism traversal)
-;;(solve-training-problem 8)
+;;(solve-training-problem 5)
+
+
+
 (define problems (vector->list (make-myproblems-call my-secret)))
 (define possible-problems (filter (lambda (p)
 				    (let
