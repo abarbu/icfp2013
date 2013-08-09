@@ -1,6 +1,6 @@
 (declare (unit rpc))
 (use medea http-client)
-(client-software (list (list"Wandering Hobos" 0.1 #f)))
+(client-software (list (list "Wandering Hobos" 0.1 #f)))
 (define (make-train-call auth-code num operators)
   (make-call auth-code "train" 
 	     (list (cons 'size  num)

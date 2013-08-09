@@ -1,5 +1,5 @@
 ;; TOOD: something
-(declare (uses rpc secret))
+(declare (uses rpc secret hobostuff))
 (use medea)
 ;; For now lets just test if this can call something
 (display "Using secret ")
