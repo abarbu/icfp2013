@@ -184,27 +184,20 @@
 
 ;; (all-values (an-expression-of-size 3 '(wh#and wh#not) '(x y z)))
 
-;; (define example (values (make-train-call1 key 5)))
-;; (define inputs (test-sequence))
-;; (define seq (values (make-eval-program-call key (cdr (assoc 'challenge example)) inputs )))
-
-;; (one-value
-;;  (let* ((code (a-program-of-size
-;;                (cdr (assoc 'size example))
-;;                (map (lambda (a) (string->symbol (conc 'wh# a))) (vector->list (cdr (assoc 'operators example))))))
-;;         (f (eval code)))
-;;   (unless (every (lambda (in out) (equal? (f in) out)) inputs (map wh#read-from-string (vector->list (cdr (assoc 'outputs seq))))) (fail))
-;;   code))
-
-;; (make-guess-call key
-;;                  (cdr (assoc 'id example))
-;;                  (format #f
-;;                          "~a"
-;;                          (unread-expr
-;;                           (one-value
-;;                            (let* ((code (a-program-of-size
-;;                                          (cdr (assoc 'size example))
-;;                                          (map (lambda (a) (string->symbol (conc 'wh# a))) (vector->list (cdr (assoc 'operators example))))))
-;;                                   (f (eval code)))
-;;                             (unless (every (lambda (in out) (equal? (f in) out)) inputs (map wh#read-from-string (vector->list (cdr (assoc 'outputs seq))))) (fail))
-;;                             code)))))
+(define (solve-training-problem size)
+ (let* ((example (values (make-train-call1 key size)))
+        (inputs (test-sequence))
+        (seq (values (make-eval-program-call key (cdr (assoc 'challenge example)) inputs ))))
+  (display (list example inputs seq))(newline)
+  (make-guess-call key
+                   (cdr (assoc 'id example))
+                   (format #f
+                           "~a"
+                           (unread-expr
+                            (one-value
+                             (let* ((code (a-program-of-size
+                                           (cdr (assoc 'size example))
+                                           (map (lambda (a) (string->symbol (conc 'wh# a))) (vector->list (cdr (assoc 'operators example))))))
+                                    (f (eval code)))
+                              (unless (every (lambda (in out) (equal? (f in) out)) inputs (map wh#read-from-string (vector->list (cdr (assoc 'outputs seq))))) (fail))
+                              code)))))))
