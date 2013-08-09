@@ -1,14 +1,14 @@
-(use stuff)
+(use stuff scheme2c-compatibility nondeterminism traversal)
 
 ;; myproblems
-(pp (with-input-from-request
-     "http://icfpc2013.cloudapp.net/myproblems?auth=key"
-     #f read-json))
+;; (pp (with-input-from-request
+;;      "http://icfpc2013.cloudapp.net/myproblems?auth=key"
+;;      #f read-json))
 
-(pp (with-input-from-request
-     "http://icfpc2013.cloudapp.net/train?auth=key"
-     (json->string '((size . 5)))
-     read-json))
+;; (pp (with-input-from-request
+;;      "http://icfpc2013.cloudapp.net/train?auth=key"
+;;      (json->string '((size . 5)))
+;;      read-json))
 
 (define (read-expr expr)
  (deep-map (lambda (a) (or (symbol? a) (number? a)))
@@ -78,6 +78,8 @@
 (define wh:op1 '(wh:not wh:shl1 wh:shr1 wh:shr4 wh:shr16))
 (define wh:op2 '(wh:and wh:or wh:xor wh:plus))
 
+(define used-operators '())
+
 (define (an-expression-of-size size allowed-operators locals)
  ;; the minimal expression size is 1
  (when (< size 1) (fail))
@@ -87,6 +89,9 @@
       (either
        (let ((op1 (a-member-of (set-intersectione wh:op1 allowed-operators)))
               (body (an-expression-of-size (- size 1) allowed-operators locals)))
+	 (if (not (member op1 used-operators))
+	     (local-set! used-operators (cons (quote op1) used-operators))
+	     )
          `(,op1 ,body))
        ;; This is not valid because programs can't contain lambdas
        ;; (let* ((var (gensym 'b))
