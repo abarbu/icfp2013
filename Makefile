@@ -14,6 +14,7 @@ main: $(addsuffix .o, $(basename $(NONEXEC_SOURCES))) src/main.o src/hobostuff_c
 
 setup: setup
 	chicken-install -s $(PACKAGES)
+	cd stuff && chicken-install -s -l ./
 	touch setup
 
 %.o: %.scm
