@@ -85,13 +85,13 @@
   (if (= size 1)
       (a-member-of (cons 'wh:0 (cons 'wh:1 locals)))
       (either
-       (either ;; exprs of min(size) = 2
-        (let ((op1 (a-member-of (set-intersectione wh:op1 allowed-operators)))
+       (let ((op1 (a-member-of (set-intersectione wh:op1 allowed-operators)))
               (body (an-expression-of-size (- size 1) allowed-operators locals)))
          `(,op1 ,body))
-        (let* ((var (gensym 'b))
-               (body (an-expression-of-size (- size 1) allowed-operators (cons var locals))))
-         `(lambda (,var) ,body)))
+       ;; This is not valid because programs can't contain lambdas
+       ;; (let* ((var (gensym 'b))
+       ;;        (body (an-expression-of-size (- size 1) allowed-operators (cons var locals))))
+       ;;  `(lambda (,var) ,body))
        (either
         (let*
           ((op2 (a-member-of (set-intersectione wh:op2 allowed-operators)))
