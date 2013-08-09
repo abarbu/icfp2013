@@ -73,6 +73,11 @@
                            "C_word *r = C_alloc(16);"
                            "uint64_t u = ~*((uint64_t*)a);"
                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:shlN (foreign-primitive scheme-object
+                            ((blob a) (integer n))
+                            "C_word *r = C_alloc(16);"
+                            "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) << n);"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
 (define wh:shl1 (foreign-primitive scheme-object
                             ((blob a))
                             "C_word *r = C_alloc(16);"
@@ -82,6 +87,11 @@
                             ((blob a))
                             "C_word *r = C_alloc(16);"
                             "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) << 8);"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:shrN (foreign-primitive scheme-object
+                            ((blob a) (integer n))
+                            "C_word *r = C_alloc(16);"
+                            "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) >> n);"
                             "C_return(C_bytevector(&r, 8, (char*)&u));"))
 (define wh:shr1 (foreign-primitive scheme-object
                             ((blob a))
@@ -103,6 +113,10 @@
                              "C_word *r = C_alloc(16);"
                              "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) >> 16);"
                              "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh:random (foreign-primitive scheme-object ()
+                                "C_word *r = C_alloc(16);"
+                                "uint64_t u = (((uint64_t)rand()) << 32 | (uint64_t)rand());"
+                                "C_return(C_bytevector(&r, 8, (char*)&u));"))
 (define (wh:if0 c t e) (if (equal? c wh:0) t e))
 (define (wh:fold blob i f)
  (let ((mask '#${00000000000000ff}))
