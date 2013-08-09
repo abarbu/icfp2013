@@ -3,7 +3,7 @@ CSCFLAGS = -O2
 CSC = csc $(CSCFLAGS)
 CC = gcc -Wall -Werror
 
-PACKAGES = medea http-client
+PACKAGES = medea http-client bind
 SOURCES = $(shell find src/ -iname \*.scm -or -iname \*.ss)
 IGNORES = src/main.scm src/stuff.scm
 NONEXEC_SOURCES = $(filter-out $(IGNORES), $(SOURCES))

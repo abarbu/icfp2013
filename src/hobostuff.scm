@@ -1,3 +1,4 @@
 (declare (unit hobostuff))
-(bind-file "hobostuff_c.c")
+(require-extension bind)
+(bind-file "./src/hobostuff_c.h")
 
