@@ -164,9 +164,11 @@
       (loop (+ n 1) (cons (wh#shl1 (car l)) l)))))
 
 (define (test-sequence)
- (append
-  (0&1bit-test-sequence)
-  (map-n (lambda _ (wh#random)) (- 256 65))))
+  (cons 
+   '#${FFFFFFFFFFFFFFFF}
+   (append
+    (0&1bit-test-sequence)
+    (map-n (lambda _ (wh#random)) (- 256 66)))))
 
 (define (test-everything key)
  (let* ((example (values (make-train-call1 key 5)))
