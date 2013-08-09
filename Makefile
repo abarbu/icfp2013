@@ -9,7 +9,7 @@ IGNORES = src/main.scm src/more-stuff.scm
 NONEXEC_SOURCES = $(filter-out $(IGNORES), $(SOURCES))
 
 all: setup main
-main: $(addsuffix .o, $(basename $(NONEXEC_SOURCES))) src/main.o src/hobostuff_c.o
+main: $(addsuffix .o, $(basename $(NONEXEC_SOURCES))) src/main.o
 	$(CSC) -o $@ $^
 
 setup: setup
