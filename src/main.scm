@@ -48,11 +48,11 @@
 (display "\n")
 ;; Try and just solve the head
 (map (lambda (my-problem)
-       (display (list "Tring to solve " (cdr (assoc 'id my-problem))))
+       (display (list "Tring to solve" my-problem))
        (let ((problem-solution (solve-problem (cdr (assoc 'id my-problem)) (cdr (assoc 'size my-problem)) (cdr (assoc 'operators my-problem)))))
 	 (display problem-solution)
 	 (if (not (equal? (cdr (assoc 'status problem-solution)) "win"))
-	     (error (list "We died on problem " (cdr (assoc 'id my-problem))))
+	     (error (list "We died on problem" my-problem))
 	     )
 	 )
        (display "\n")
