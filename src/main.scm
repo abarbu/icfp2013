@@ -32,15 +32,17 @@
 				      (and
 				       ;; Stricly speaking also filter things we failed to solve
 				       ;; probably with timeleft of 0
-				       (or (not (assoc 'solved p))
-					   (not (cdr (assoc 'solved p))))
-				       (not (member "fold" opl))
+				       ;;(or 
+					(not (assoc 'solved p))
+					   ;;(not (cdr (assoc 'solved p)))
+					   ;;)
+				       ;;(not (member "fold" opl))
 				       (or
 					(not (assoc 'timeLeft p))
 					(not (equal? (cdr (assoc 'timeLeft p)) 0))
 				       )
-				       (not (member "tfold" opl))
-				       (< (cdr (assoc 'size p)) 8)
+				       ;;(not (member "tfold" opl))
+				       (< (cdr (assoc 'size p)) 11)
 				       (< (vector-length (cdr (assoc 'operators p)))))))
 				  problems))
 (pretty-print possible-problems)
@@ -58,5 +60,5 @@
 	 )
        (display "\n")
        (display "Sleeping\n")
-       (sleep 6)
+       (sleep 20)
        ) possible-problems)

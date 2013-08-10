@@ -24,3 +24,5 @@ setup: setup
 
 %.o: %.c
 	$(CC) -c $< -o $@
+lightning_package.tar: $(SOURCES)
+	tar -cf $@ $(SOURCES) 
