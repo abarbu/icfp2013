@@ -26,7 +26,7 @@
                           (usleep 1000000) ;1s
                           (k (list n (read-object-from-file (format #f "/tmp/out-~a-~a.sc" id n))))))
                        30)
-                      (usleep 100000))  ;1s
+                      (usleep 1000000))  ;1s
                     500)))))
    (pp depth&solution)
    (system "killall slave")
