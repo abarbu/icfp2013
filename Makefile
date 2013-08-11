@@ -5,10 +5,15 @@ CC = gcc -Wall -Werror
 
 PACKAGES = medea http-client bind kvlists scheme2c-compatibility nondeterminism traversal random-bsd
 SOURCES = $(shell find src/ -iname \*.scm -or -iname \*.ss)
+IGNORES = src/main.scm src/master.scm src/slave.scm
 NONEXEC_SOURCES = $(filter-out $(IGNORES), $(SOURCES))
 
-all: setup main
+all: setup main master slave
 main: $(addsuffix .o, $(basename $(NONEXEC_SOURCES))) src/main.o
+	$(CSC) -o $@ $^
+master: $(addsuffix .o, $(basename $(NONEXEC_SOURCES))) src/master.o
+	$(CSC) -o $@ $^
+slave: $(addsuffix .o, $(basename $(NONEXEC_SOURCES))) src/slave.o
 	$(CSC) -o $@ $^
 
 setup: setup

@@ -1,0 +1,12 @@
+(declare (uses stuff rpc secret more-stuff))
+(use stuff scheme2c-compatibility nondeterminism traversal)
+
+(let ((data-file (car (command-line-arguments)))
+      (depth (string->number (cadr (command-line-arguments))))
+      (output-file (caddr (command-line-arguments))))
+ (display depth)(newline)
+ (let ((data (read-object-from-file data-file)))
+  (call/cc (lambda (k)
+            (set-fail! (lambda () (format #t "Failed ~a~%" depth) (k #f)))
+            (write-object-to-file (solve-problem1-of-depth-with-data depth data)
+                                  output-file)))))

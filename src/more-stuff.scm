@@ -162,16 +162,17 @@
        `(,op2 ,body0 ,body1)))))
 
  (define (a-program-of-size size allowed-operators)
-  (let ((var (gensym 'x)))
-   `(lambda (,var)
-     ,(an-expression-of-size
-       (let ((i (an-integer-between 1 (- size 1))))
-        (display i)(newline)
-        i)
-       wh#most
-       ;; (append (take wh#op1 2) (take wh#op2 2))
-       ;; allowed-operators
-       (list var)))))
+  (a-program-of-exactly-size (an-integer-between 2 size) allowed-operators))
+
+(define (a-program-of-exactly-size size allowed-operators)
+ (let ((var (gensym 'x)))
+  `(lambda (,var)
+    ,(an-expression-of-size
+      (- size 1)
+      wh#most
+      ;; (append (take wh#op1 2) (take wh#op2 2))
+      ;; allowed-operators
+      (list var)))))
 
 (define (0&1bit-test-sequence)
  (let loop ((n 0) (l (list wh#1)))
@@ -232,33 +233,45 @@
 ;; ((status . "mismatch") (values . #("0xBFFFFEFFFFFFFFFF" "0x0000BFFFFF000000" "0x0000BFFFFEFFFFFF")))
 ;; ((status . "win") (lightning . #t))
 
+(define (solve-problem1-of-depth-with-data size data)
+ (let ((id (first data))
+       (operators (second data))
+       (inputs (third data))
+       (outputs (fourth data)))
+  (one-value
+   (let* ((code (a-program-of-exactly-size
+                 size
+                 (map (lambda (a) (string->symbol (conc 'wh# a))) (vector->list operators))))
+          (f (eval code)))
+    (unless (every (lambda (in out) (equal? (f in) out)) inputs outputs)
+     (fail))
+    code))))
+
 (define (simple-solve-problem id size operators)
  (let* ((inputs (test-sequence))
-        (seq (values (begin (display "A")(newline)(make-eval-id-call my-secret id inputs ))))
-)
-  (display (list id inputs seq))(newline)
-  (display (list id size))
-  (display (list "operators:" operators))(newline)
+        (seq (values (make-eval-id-call my-secret id inputs ))))
+  (display (list id inputs seq size operators))(newline)
+  (display (list id size operators))(newline)
   (display "Making guess call")(newline)
-  (make-guess-call my-secret
-                   id
-                   (format #f
-                           "~a"
-                           (unread-expr
-                            (one-value
-                             (let* ((code (a-program-of-size
-                                           size
-                                           (map (lambda (a) (string->symbol (conc 'wh# a))) (vector->list operators))))
-                                    (f (eval code))
-				    )
-                              (unless (every (lambda (in out) (equal? (f in) out)) inputs (map wh#read-from-string (vector->list (cdr (assoc 'outputs seq))))) (fail))
-                              code)))))))
+  (make-guess-call
+   my-secret
+   id
+   (format #f
+           "~a"
+           (unread-expr
+            (one-value
+             (let* ((code (a-program-of-size
+                           size
+                           (map (lambda (a) (string->symbol (conc 'wh# a))) (vector->list operators))))
+                    (f (eval code)))
+              (unless (every (lambda (in out) (equal? (f in) out)) inputs (map wh#read-from-string (vector->list (cdr (assoc 'outputs seq))))) (fail))
+              code)))))))
 
 (define (solve-problem id size operators)
  (let* ((inputs (test-sequence))
         (seq (values (make-eval-id-call my-secret id inputs)))
         (outputs (map wh#read-from-string (vector->list (cdr (assoc 'outputs seq))))))
-  (let ((prev-inputs inputs) (prev-outputs outputs) (n 0))
+  (let loop ((prev-inputs inputs) (prev-outputs outputs) (n 0))
    (display (list id inputs seq))(newline)
    (display "Solving")(newline)
    (let* ((solution (time (format #f
@@ -274,10 +287,10 @@
           (r (begin (display solution)(newline) (make-guess-call my-secret id solution))))
     (display r)(newline)
     (when (equal? (cdr (assoc 'status r)) "mismatch")
-     (when (= n 5)
+     (when (< n 3)
       (let ((a (map wh#read-from-string (cdr (assoc 'values r)))))
        (display "Trying again")(newline)
-       (display (cons (first a) prev-inputs) (cons (second a) prev-outputs) (+ n 1)))))))))
+       (loop (cons (first a) prev-inputs) (cons (second a) prev-outputs) (+ n 1)))))))))
 
 (define (solve-problem1 l)
  (solve-problem (cdr (assoc 'id l)) (cdr (assoc 'size l))(cdr (assoc 'operators l))))
