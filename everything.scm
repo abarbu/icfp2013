@@ -1,5 +1,5 @@
-(declare (unit more-stuff))
-(use stuff scheme2c-compatibility nondeterminism traversal random-bsd)
+(import chicken scheme srfi-1 foreign data-structures extras)
+(use medea scheme2c-compatibility nondeterminism traversal random-bsd http-client)
 
 (define (a-boolean-rand)
  (call-with-current-continuation
@@ -169,7 +169,9 @@
   `(lambda (,var)
     ,(an-expression-of-size
       (- size 1)
-      wh#most
+      (if allowed-operators
+          allowed-operators
+          wh#most)
       ;; (append (take wh#op1 2) (take wh#op2 2))
       ;; allowed-operators
       (list var)))))
@@ -181,16 +183,21 @@
       (loop (+ n 1) (cons (wh#shl1 (car l)) l)))))
 
 (define (test-sequence)
- (append (map-n (lambda _ (wh#random)) (- 256 73))
-         (list '#${000000000000F101}
-               '#${F000000000000001}
-               '#${BFFFFEFFFFFFFFFF}
-               '#${FFFFFFFFFFFFFFFE}
-               '#${FFFFFFFFFFFFFFFF}
-               '#${FFFFFFFFFFFFFFFF}
-               '#${7FFFFFFFFFFFFFFF}
-               '#${110000000000FF00})
-         (0&1bit-test-sequence)))
+ (cons
+  '#${000000000000F101}
+  (cons
+   '#${BFFFFEFFFFFFFFFF}
+   (cons
+    '#${FFFFFFFFFFFFFFFE}
+    (cons
+     '#${FFFFFFFFFFFFFFFF}
+     (cons
+      '#${FFFFFFFFFFFFFFFF}
+      (cons
+       '#${7FFFFFFFFFFFFFFF}
+       (append
+        (0&1bit-test-sequence)
+        (map-n (lambda _ (wh#random)) (- 256 70))))))))))
 
 (define (test-everything key)
  (let* ((example (values (make-train-call1 key 5)))
@@ -230,7 +237,7 @@
 ;; ((status . "mismatch") (values . #("0xBFFFFEFFFFFFFFFF" "0x0000BFFFFF000000" "0x0000BFFFFEFFFFFF")))
 ;; ((status . "win") (lightning . #t))
 
-(define (solve-problem1-of-depth-with-data size data)
+(define (solve-problem1-of-depth-with-data size data with-ops?)
  (let ((id (first data))
        (operators (second data))
        (inputs (third data))
@@ -238,7 +245,9 @@
   (one-value
    (let* ((code (a-program-of-exactly-size
                  size
-                 (map (lambda (a) (string->symbol (conc 'wh# a))) (vector->list operators))))
+                 (if with-ops?
+                     (map (lambda (a) (string->symbol (conc 'wh# a))) (vector->list operators))
+                     #f)))
           (f (eval code)))
     (unless (every (lambda (in out) (equal? (f in) out)) inputs outputs)
      (fail))
@@ -291,3 +300,193 @@
 
 (define (solve-problem1 l)
  (solve-problem (cdr (assoc 'id l)) (cdr (assoc 'size l))(cdr (assoc 'operators l))))
+
+(client-software (list (list "Wandering Hobos" 0.1 #f)))
+(define (wh:format blob)
+ (let ((str (format #f "~a" blob)))
+  (string-append "0x" (list->string (drop (but-last (string->list str)) 3)))))
+(define (make-train-call auth-code num operators)
+  (make-call auth-code "train" 
+	     (list (cons 'size  num)
+		   (cons 'operators (list->vector operators))
+		   )
+	     )
+  )
+(define (make-train-call1 auth-code num)
+  (make-call auth-code "train" 
+	     (list (cons 'size  num))
+	     )
+  )
+(define (make-myproblems-call auth-code)
+  (make-call auth-code "myproblems" #f)
+)
+(define (make-eval-id-call auth-code id arguments) 
+  (make-call auth-code "eval" (list
+			       (cons 'id id)
+			       (cons 'arguments (list->vector (map wh:format arguments)))))
+  )
+(define (make-eval-program-call auth-code program arguments)
+  (make-call auth-code "eval" (list
+			       (cons 'program program)
+			       (cons 'arguments (list->vector (map wh:format arguments)))
+			       ))
+  )
+(define (make-guess-call auth-code id program)
+  (make-call auth-code "guess" (list
+			       (cons 'program program)
+			       (cons 'id id)))
+  )
+(define (make-status-call auth-code)
+  (make-call auth-code "status" #f)
+)
+(define (make-call auth-code type params)
+  (display "Making call ")
+  (display params)
+  (display "\n")
+  (with-input-from-request (make-req-url type auth-code) (json->string params) read-json)
+)
+
+(define (make-req-url method auth-code)
+  (string-append "http://icfpc2013.cloudapp.net/" method "?auth=" auth-code)
+)
+
+(define my-secret "04683EUSFXg7YCiEYqB0PzBEnGDUAAxpe8ZDxdruvpsH1H")
+
+;; program    P ::= "(" "lambda" "(" id ")" e ")"
+;; expression e ::= "0" | "1" | id
+;;               | "(" "if0" e e e ")"
+;;               | "(" "fold" e e "(" "lambda" "(" id id ")" e ")" ")"
+;;               | "(" op1 e ")"
+;;               | "(" op2 e e ")"
+;;          op1 ::= "not" | "shl1" | "shr1" | "shr4" | "shr16"
+;;          op2 ::= "and" | "or" | "xor" | "plus" 
+;;          id  ::= [a-z]+
+
+;; A valid program P contains at most one occurrence of "fold".
+
+;; The expression "(fold e0 e1 (lambda (x y) e2))" uses the lambda-term
+;; to fold over each byte of e0 bound to x (starting from the least
+;; significant), and with the accumulator y initially bound to e1.
+
+;; For example, given P = (lambda (x) (fold x 0 (lambda (y z) (or y z)))), 
+
+;;    P(0x1122334455667788) 
+
+;;    reduces to 
+
+;;    (or 0x0000000000000011 
+;;    (or 0x0000000000000022 
+;;    (or 0x0000000000000033 
+;;    (or 0x0000000000000044 
+;;    (or 0x0000000000000055 
+;;    (or 0x0000000000000066 
+;;    (or 0x0000000000000077 
+;;    (or 0x0000000000000088 
+;;        0x0000000000000000))))))))
+
+(define (deep-map p f tree)
+ (cond ((p tree) (f tree))
+       ((list? tree) (map (lambda (subtree) (deep-map p f subtree)) tree))
+       (else tree)))
+
+#>
+#include <endian.h>
+<#
+
+(define wh#0 '#${0000000000000000})
+(define wh#1 '#${0000000000000001})
+(define wh#plus (foreign-primitive scheme-object
+                            ((blob a)
+                             (blob b))
+                            "C_word *r = C_alloc(16);"
+                            "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) + be64toh(*((uint64_t*)b)));"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#and (foreign-primitive scheme-object
+                           ((blob a)
+                            (blob b))
+                           "C_word *r = C_alloc(16);"
+                           "uint64_t u = *((uint64_t*)a) & *((uint64_t*)b);"
+                           "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#or  (foreign-primitive scheme-object
+                           ((blob a)
+                            (blob b))
+                           "C_word *r = C_alloc(16);"
+                           "uint64_t u = *((uint64_t*)a) | *((uint64_t*)b);"
+                           "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#xor (foreign-primitive scheme-object
+                           ((blob a)
+                            (blob b))
+                           "C_word *r = C_alloc(16);"
+                           "uint64_t u = *((uint64_t*)a) ^ *((uint64_t*)b);"
+                           "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#not (foreign-primitive scheme-object
+                           ((blob a))
+                           "C_word *r = C_alloc(16);"
+                           "uint64_t u = ~*((uint64_t*)a);"
+                           "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#shlN (foreign-primitive scheme-object
+                            ((blob a) (integer n))
+                            "C_word *r = C_alloc(16);"
+                            "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) << n);"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#shl1 (foreign-primitive scheme-object
+                            ((blob a))
+                            "C_word *r = C_alloc(16);"
+                            "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) << 1);"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#shl8 (foreign-primitive scheme-object
+                            ((blob a))
+                            "C_word *r = C_alloc(16);"
+                            "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) << 8);"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#shrN (foreign-primitive scheme-object
+                            ((blob a) (integer n))
+                            "C_word *r = C_alloc(16);"
+                            "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) >> n);"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#shr1 (foreign-primitive scheme-object
+                            ((blob a))
+                            "C_word *r = C_alloc(16);"
+                            "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) >> 1);"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#shr4 (foreign-primitive scheme-object
+                            ((blob a))
+                            "C_word *r = C_alloc(16);"
+                            "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) >> 4);"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#shr8 (foreign-primitive scheme-object
+                            ((blob a))
+                            "C_word *r = C_alloc(16);"
+                            "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) >> 8);"
+                            "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#shr16 (foreign-primitive scheme-object
+                             ((blob a))
+                             "C_word *r = C_alloc(16);"
+                             "uint64_t u = htobe64(be64toh(*((uint64_t*)a)) >> 16);"
+                             "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define wh#random (foreign-primitive scheme-object ()
+                                "C_word *r = C_alloc(16);"
+                                "uint64_t u = (((uint64_t)rand()) << 32 | (uint64_t)rand());"
+                                "C_return(C_bytevector(&r, 8, (char*)&u));"))
+(define (wh#if0 c t e) (if (equal? c wh#0) t e))
+(define (wh#fold blob i f)
+ (let ((mask '#${00000000000000ff}))
+  (let loop ((blob blob) (o 0) (r i))
+   (if (= o 8)
+       r
+       (loop (wh#shr8 blob)
+             (+ o 1)
+             (f (wh#and mask blob) r))))))
+
+(define (main)
+ (let ((data-file (car (command-line-arguments)))
+       (depth (string->number (cadr (command-line-arguments))))
+       (output-file (caddr (command-line-arguments)))
+       (with-ops? (= (string->number (cadddr (command-line-arguments))) 1)))
+  (display depth)(newline)
+  (let ((data (read-object-from-file data-file)))
+   (call/cc (lambda (k)
+             (set-fail! (lambda () (format #t "Failed ~a~%" depth) (k #f)))
+             (write-object-to-file (solve-problem1-of-depth-with-data depth data with-ops?)
+                                   output-file))))))
+(main)
