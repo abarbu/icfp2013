@@ -1,9 +1,9 @@
-CSCFLAGS = -O2 
+CSCFLAGS = -O2
 # -O4 -optimize-leaf-routines -u -unboxing  -no-argc-checks -no-bound-checks -no-procedure-checks -local
 CSC = csc $(CSCFLAGS)
 CC = gcc -Wall -Werror
 
-PACKAGES = medea http-client bind kvlists scheme2c-compatibility nondeterminism traversal
+PACKAGES = medea http-client bind kvlists scheme2c-compatibility nondeterminism traversal random-bsd
 SOURCES = $(shell find src/ -iname \*.scm -or -iname \*.ss)
 NONEXEC_SOURCES = $(filter-out $(IGNORES), $(SOURCES))
 

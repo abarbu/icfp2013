@@ -21,30 +21,43 @@
 
 (declare (uses stuff rpc secret more-stuff))
 (use stuff scheme2c-compatibility nondeterminism traversal)
-;;(solve-training-problem 5)
 
+;; 42 are bonus problems
 
+(let ((t (values (make-train-call1 my-secret 11))))
+ (display t)(newline)
+ (display (solve-problem1 t))(newline))
 
-(define problems (vector->list (make-myproblems-call my-secret)))
-(define possible-problems (filter (lambda (p)
-				    (let
-					((opl (vector->list (cdr (assoc 'operators p)))))
-				      (and
-				       ;; Stricly speaking also filter things we failed to solve
-				       ;; probably with timeleft of 0
-				       (not (assoc 'solved p))
-				       (not (member "fold" opl))
-				       (not (member "tfold" opl))
-				       (< (cdr (assoc 'size p)) 8)
-;;				       (eq? (cdr (assoc 'id p)) '0dO2InyjjBuzqwxqb2mvUhhX)
-				       (< (vector-length (cdr (assoc 'operators p)))))))
-				  problems))
-(pretty-print possible-problems)
-(display (length possible-problems))
-(display "\n")
-;; Try and just solve the head
-(display (car possible-problems))
-(define my-problem (car possible-problems))
-(display (list "Tring to solve " (cdr (assoc 'id my-problem))))
-(solve-problem (cdr (assoc 'id my-problem)) (cdr (assoc 'size my-problem)) (cdr (assoc 'operators my-problem)))
-(display "\n")
+ ;; (time (display (solve-training-problem 11)))
+;; (newline)
+
+;; (let ((id (car (command-line-arguments))))
+;;  (display id)(newline)
+;;  (let ((l (find (lambda (a) (equal? (cdr (assoc 'id a)) id))
+;;                 (read-object-from-file "grr"))))
+;;   (display l)(newline)
+;;   (solve-problem1 l)))
+
+;; (define problems (vector->list (make-myproblems-call my-secret)))
+;; (define possible-problems (filter (lambda (p)
+;; 				    (let
+;; 					((opl (vector->list (cdr (assoc 'operators p)))))
+;; 				      (and
+;; 				       ;; Stricly speaking also filter things we failed to solve
+;; 				       ;; probably with timeleft of 0
+;; 				       (not (assoc 'solved p))
+;; 				       (not (member "fold" opl))
+;; 				       (not (member "tfold" opl))
+;; 				       (< (cdr (assoc 'size p)) 8)
+;; ;;				       (eq? (cdr (assoc 'id p)) '0dO2InyjjBuzqwxqb2mvUhhX)
+;; 				       (< (vector-length (cdr (assoc 'operators p)))))))
+;; 				  problems))
+;; (pretty-print possible-problems)
+;; (display (length possible-problems))
+;; (display "\n")
+;; ;; Try and just solve the head
+;; (display (car possible-problems))
+;; (define my-problem (car possible-problems))
+;; (display (list "Tring to solve " (cdr (assoc 'id my-problem))))
+;; (solve-problem (cdr (assoc 'id my-problem)) (cdr (assoc 'size my-problem)) (cdr (assoc 'operators my-problem)))
+;; (display "\n")
