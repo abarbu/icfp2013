@@ -35,3 +35,5 @@ setup: setup
 	$(CC) -c $< -o $@
 lightning_package.tar: $(SOURCES)
 	tar -cf $@ $(SOURCES) 
+package.tar: $(SOURCES)
+	tar -cf $@ $(SOURCES) 
