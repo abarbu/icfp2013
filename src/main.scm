@@ -28,9 +28,6 @@
  (display t)(newline)
  (display (solve-problem1 t))(newline))
 
- ;; (time (display (solve-training-problem 11)))
-;; (newline)
-
 ;; (let ((id (car (command-line-arguments))))
 ;;  (display id)(newline)
 ;;  (let ((l (find (lambda (a) (equal? (cdr (assoc 'id a)) id))
@@ -45,19 +42,34 @@
 ;; 				      (and
 ;; 				       ;; Stricly speaking also filter things we failed to solve
 ;; 				       ;; probably with timeleft of 0
-;; 				       (not (assoc 'solved p))
-;; 				       (not (member "fold" opl))
-;; 				       (not (member "tfold" opl))
-;; 				       (< (cdr (assoc 'size p)) 8)
-;; ;;				       (eq? (cdr (assoc 'id p)) '0dO2InyjjBuzqwxqb2mvUhhX)
+;; 				       ;;(or 
+;; 					(not (assoc 'solved p))
+;; 					   ;;(not (cdr (assoc 'solved p)))
+;; 					   ;;)
+;; 				       ;;(not (member "fold" opl))
+;; 				       (or
+;; 					(not (assoc 'timeLeft p))
+;; 					(not (equal? (cdr (assoc 'timeLeft p)) 0))
+;; 				       )
+;; 				       ;;(not (member "tfold" opl))
+;; 				       (< (cdr (assoc 'size p)) 11)
 ;; 				       (< (vector-length (cdr (assoc 'operators p)))))))
 ;; 				  problems))
 ;; (pretty-print possible-problems)
 ;; (display (length possible-problems))
 ;; (display "\n")
 ;; ;; Try and just solve the head
-;; (display (car possible-problems))
-;; (define my-problem (car possible-problems))
-;; (display (list "Tring to solve " (cdr (assoc 'id my-problem))))
-;; (solve-problem (cdr (assoc 'id my-problem)) (cdr (assoc 'size my-problem)) (cdr (assoc 'operators my-problem)))
-;; (display "\n")
+;; (sleep 20)
+;; (map (lambda (my-problem)
+;;        (display (list "Tring to solve" my-problem))
+;;        (let ((problem-solution (solve-problem (cdr (assoc 'id my-problem)) (cdr (assoc 'size my-problem)) (cdr (assoc 'operators my-problem)))))
+;; 	 (display problem-solution)
+;; 	 (if (not (equal? (cdr (assoc 'status problem-solution)) "win"))
+;; 	     (error (list "We died on problem" my-problem))
+;; 	     )
+;; 	 )
+;;        (display "\n")
+;;        (display "Sleeping\n")
+;;        (sleep 20)
+;;        ) possible-problems)
+
